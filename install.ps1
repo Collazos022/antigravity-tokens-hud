@@ -145,6 +145,21 @@ $shortcut.Save()
 # Registro de Windows Run para visualización en Administrador de Tareas
 Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "Antigravity Tokens HUD" -Value "wscript.exe `"$vbsPath`"" -Force
 
+# 6. Registrar Plugin Oficial en Antigravity (Customizations y Extensions)
+Write-Host "🔌 Registrando plugin oficial en Antigravity Customizations..." -ForegroundColor Yellow
+$officialPluginDir = "$env:USERPROFILE\.gemini\config\plugins\antigravity-tokens-hud"
+if (-not (Test-Path "$officialPluginDir\assets")) { New-Item -ItemType Directory -Path "$officialPluginDir\assets" -Force | Out-Null }
+if (-not (Test-Path "$officialPluginDir\sidecars\analytics")) { New-Item -ItemType Directory -Path "$officialPluginDir\sidecars\analytics" -Force | Out-Null }
+
+if ($PSScriptRoot) {
+    Copy-Item "$PSScriptRoot\plugin.json" "$officialPluginDir\plugin.json" -Force -ErrorAction SilentlyContinue
+    Copy-Item "$PSScriptRoot\assets\icon.png" "$officialPluginDir\assets\logo.png" -Force -ErrorAction SilentlyContinue
+    Copy-Item "$PSScriptRoot\token_stats.py" "$officialPluginDir\token_stats.py" -Force -ErrorAction SilentlyContinue
+    Copy-Item "$PSScriptRoot\sidecars\analytics\sidecar.json" "$officialPluginDir\sidecars\analytics\sidecar.json" -Force -ErrorAction SilentlyContinue
+    Copy-Item "$PSScriptRoot\sidecars\analytics\server.js" "$officialPluginDir\sidecars\analytics\server.js" -Force -ErrorAction SilentlyContinue
+}
+Write-Host "✅ Plugin registrado en Customizations > Installed." -ForegroundColor Green
+
 # Detener instancias previas y arrancar servicio
 Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object { 
     $_.Name -like "*node*" -and $_.CommandLine -like "*antigravity-tokens-hud*" 

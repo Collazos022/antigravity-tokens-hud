@@ -47,6 +47,8 @@ Monitor en tiempo real de tokens y cuotas
 | **Cuota Semanal** | Porcentaje disponible de tu cuota semanal asignada por Google Antigravity. |
 | **Tooltip "Acerca de" con Versión** | Información detallada con la versión actual (`v1.1.0`), cuotas exactas y guía de cambio de idioma. |
 | **Soporte Multilingüe (5 Idiomas)** | Detecta el idioma del sistema y permite alternar dinámicamente con un solo clic. |
+| **Plugin Oficial (Customizations)** | Reconocido de forma nativa por Antigravity en **Customizations > Installed**, con opción de habilitar/deshabilitar. |
+| **Panel Analítico (🧩 Extensions)** | Panel lateral interactivo en el Auxiliary Pane con desglose de tokens (Prompts, Cache, Thinking, Output) e histórico de conversaciones. |
 | **Cero Impacto en el Agente** | Corre como un servicio local en segundo plano; no consume tokens de contexto de tus conversaciones. |
 | **Arranque Silencioso** | Se inicia automáticamente con Windows a través de un script VBS en segundo plano sin ventanas de consola. |
 

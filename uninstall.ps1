@@ -20,4 +20,10 @@ if (Test-Path $InstallDir) {
     Write-Host "✅ Removed $InstallDir." -ForegroundColor Green
 }
 
+$officialPluginDir = "$env:USERPROFILE\.gemini\config\plugins\antigravity-tokens-hud"
+if (Test-Path $officialPluginDir) {
+    Remove-Item $officialPluginDir -Recurse -Force
+    Write-Host "✅ Removed plugin from Antigravity Customizations." -ForegroundColor Green
+}
+
 Write-Host "✨ Antigravity Tokens HUD completely uninstalled." -ForegroundColor Green
