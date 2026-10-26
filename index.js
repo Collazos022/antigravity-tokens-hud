@@ -1,9 +1,22 @@
 #!/usr/bin/env node
 
+/**
+ * Antigravity Tokens HUD - Background Daemon
+ * Injects token & quota monitors into Antigravity 2.0 via Chrome DevTools Protocol.
+ */
+
 const fs = require("fs");
 const path = require("path");
 const os = require("os");
 const { execFile } = require("child_process");
+
+// Global fail-safe: prevent process from ever terminating unexpectedly
+process.on("uncaughtException", (err) => {
+  // Silent fail-safe
+});
+process.on("unhandledRejection", (reason) => {
+  // Silent fail-safe
+});
 
 function getDevToolsFilePath() {
   const home = os.homedir();
@@ -18,12 +31,38 @@ function getDevToolsFilePath() {
   }
 }
 
+function findPythonBinary() {
+  if (process.platform === "win32") {
+    const directCandidates = [
+      path.join(process.env.LOCALAPPDATA || "", "Programs", "Python", "Python312", "python.exe"),
+      "C:\\Users\\cared\\AppData\\Local\\Programs\\Python\\Python312\\python.exe"
+    ];
+    for (const cand of directCandidates) {
+      if (cand && fs.existsSync(cand)) return cand;
+    }
+
+    const baseDir = path.join(process.env.LOCALAPPDATA || "", "Programs", "Python");
+    if (fs.existsSync(baseDir)) {
+      try {
+        const subdirs = fs.readdirSync(baseDir);
+        for (const sub of subdirs) {
+          const cand = path.join(baseDir, sub, "python.exe");
+          if (fs.existsSync(cand)) return cand;
+        }
+      } catch (_) {}
+    }
+    return "python";
+  }
+  return "python3";
+}
+
 const DEVTOOLS_FILE = getDevToolsFilePath();
 const TOKEN_STATS_SCRIPT = path.join(__dirname, "token_stats.py");
 const CLIENT_SCRIPT_PATH = fs.existsSync(path.join(__dirname, "client_widget.js"))
   ? path.join(__dirname, "client_widget.js")
   : path.join(__dirname, "client_widget_injector.js");
 const CONFIG_FILE = path.join(__dirname, "config.json");
+const PYTHON_BIN = findPythonBinary();
 
 let cdpMessageId = 1;
 function nextCdpId() {
@@ -31,7 +70,7 @@ function nextCdpId() {
   return cdpMessageId;
 }
 
-// Map of pageId -> { ws, injected: boolean, url: string }
+// Map of pageId -> { ws, pageId, url }
 const activePages = new Map();
 let currentPort = null;
 let isUpdating = false;
@@ -43,7 +82,7 @@ function getConfigLang() {
       if (cfg && cfg.lang) return cfg.lang;
     }
   } catch (_) {}
-  return "en";
+  return "es";
 }
 
 function getDevToolsInfo() {
@@ -51,7 +90,8 @@ function getDevToolsInfo() {
   try {
     const content = fs.readFileSync(DEVTOOLS_FILE, "utf8").trim().split("\n");
     if (content.length >= 1 && content[0]) {
-      return { port: parseInt(content[0].trim(), 10) };
+      const port = parseInt(content[0].trim(), 10);
+      if (!isNaN(port) && port > 0) return { port };
     }
   } catch (_) {}
   return null;
@@ -60,6 +100,7 @@ function getDevToolsInfo() {
 async function listAntigravityPages(port) {
   try {
     const res = await fetch(`http://127.0.0.1:${port}/json`, { signal: AbortSignal.timeout(1500) });
+    if (!res.ok) return [];
     const list = await res.json();
     return list.filter(p => p.type === "page" && p.url && (p.url.includes("127.0.0.1") || p.url.includes("localhost") || p.url.includes("antigravity")));
   } catch (_) {
@@ -69,12 +110,11 @@ async function listAntigravityPages(port) {
 
 function fetchTokenStats() {
   return new Promise((resolve) => {
-    const pythonBin = process.platform === "win32" ? "python" : "python3";
     const env = { ...process.env };
     if (process.platform !== "win32") {
       env.PATH = ["/opt/homebrew/bin", "/usr/local/bin", "/usr/bin", "/bin", process.env.PATH || ""].join(":");
     }
-    execFile(pythonBin, [TOKEN_STATS_SCRIPT, "--json"], { timeout: 10000, env }, (err, stdout) => {
+    execFile(PYTHON_BIN, [TOKEN_STATS_SCRIPT, "--json"], { timeout: 8000, env }, (err, stdout) => {
       if (err || !stdout) {
         resolve(null);
         return;
@@ -102,7 +142,7 @@ function connectPageWebSocket(page) {
 
     try {
       ws = new WebSocket(page.webSocketDebuggerUrl);
-      const entry = { ws, injected: false, pageId: page.id, url: page.url };
+      const entry = { ws, pageId: page.id, url: page.url };
 
       ws.onopen = () => {
         if (!resolved) {
@@ -119,7 +159,6 @@ function connectPageWebSocket(page) {
           if (data.error) {
             const msgText = data.error.message || "";
             if (msgText.includes("execution context") || msgText.includes("detached") || msgText.includes("Target closed")) {
-              entry.injected = false;
               try { ws.close(); } catch (_) {}
               activePages.delete(page.id);
             }
@@ -149,6 +188,13 @@ function connectPageWebSocket(page) {
   });
 }
 
+function cleanupPages() {
+  for (const [id, entry] of activePages) {
+    try { entry.ws.close(); } catch (_) {}
+  }
+  activePages.clear();
+}
+
 async function updateLoop() {
   if (isUpdating) return;
   isUpdating = true;
@@ -156,25 +202,26 @@ async function updateLoop() {
   try {
     const info = getDevToolsInfo();
     if (!info) {
-      for (const [id, entry] of activePages) {
-        try { entry.ws.close(); } catch (_) {}
-      }
-      activePages.clear();
+      if (activePages.size > 0) cleanupPages();
+      currentPort = null;
       return;
     }
 
     if (currentPort !== info.port) {
+      cleanupPages();
       currentPort = info.port;
-      for (const [id, entry] of activePages) {
-        try { entry.ws.close(); } catch (_) {}
-      }
-      activePages.clear();
     }
 
     const pages = await listAntigravityPages(currentPort);
+    if (!pages || pages.length === 0) {
+      // Antigravity might be closed or starting up
+      if (activePages.size > 0) cleanupPages();
+      return;
+    }
+
     const currentPageIds = new Set(pages.map(p => p.id));
 
-    // Remove dead pages
+    // Remove closed pages
     for (const [id, entry] of activePages) {
       if (!currentPageIds.has(id)) {
         try { entry.ws.close(); } catch (_) {}
@@ -182,7 +229,7 @@ async function updateLoop() {
       }
     }
 
-    // Connect new pages
+    // Connect any new pages
     for (const page of pages) {
       const existing = activePages.get(page.id);
       if (!existing || existing.ws.readyState !== WebSocket.OPEN) {
@@ -210,42 +257,32 @@ async function updateLoop() {
     for (const [id, entry] of activePages) {
       if (entry.ws.readyState !== WebSocket.OPEN) continue;
 
-      let evalCode = "";
-      if (!entry.injected) {
-        evalCode = `
-          window.__AGY_DATA__ = ${payload};
-          window.__AGY_LANG__ = ${JSON.stringify(lang)};
-          ${clientScript}
-        `;
-        entry.injected = true;
-      } else {
-        evalCode = `
-          window.__AGY_DATA__ = ${payload};
-          window.__AGY_LANG__ = ${JSON.stringify(lang)};
-          if (window.__AGY_RENDER__) {
-            window.__AGY_RENDER__();
-          } else {
-            ${clientScript}
-          }
-        `;
-      }
+      const evalCode = `
+        window.__AGY_DATA__ = ${payload};
+        window.__AGY_LANG__ = ${JSON.stringify(lang)};
+        ${clientScript}
+      `;
 
-      entry.ws.send(JSON.stringify({
-        id: nextCdpId(),
-        method: "Runtime.evaluate",
-        params: {
-          expression: evalCode,
-          returnByValue: false
-        }
-      }));
+      try {
+        entry.ws.send(JSON.stringify({
+          id: nextCdpId(),
+          method: "Runtime.evaluate",
+          params: {
+            expression: evalCode,
+            returnByValue: false
+          }
+        }));
+      } catch (_) {
+        activePages.delete(id);
+      }
     }
   } catch (_) {
-    // Non-fatal, retry next tick
+    // Silent fail-safe
   } finally {
     isUpdating = false;
   }
 }
 
-console.log("[Antigravity Tokens HUD] Daemon running. Monitoring Antigravity DevTools...");
+console.log("[Antigravity Tokens HUD] Daemon running. Python:", PYTHON_BIN);
 setInterval(updateLoop, 1000);
 updateLoop();

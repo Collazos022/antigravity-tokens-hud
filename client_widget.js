@@ -68,18 +68,103 @@
     return n + "";
   }
 
-  function formatResetTime(seconds, isRu) {
+  const HUD_VERSION = "v1.2.0";
+
+  const I18N = {
+    es: {
+      code: "es",
+      name: "Español",
+      title5h: "Límite 5h",
+      titleWeekly: "Semanal",
+      now: "ahora",
+      d: "d",
+      h: "h",
+      m: "m",
+      aboutTitle: `Antigravity Tokens HUD ${HUD_VERSION}`,
+      aboutDesc: "Monitor en tiempo real de tokens y cuotas",
+      switchHint: "💡 Haz clic en el widget para alternar idioma (Siguiente: English)"
+    },
+    en: {
+      code: "en",
+      name: "English",
+      title5h: "5-Hour",
+      titleWeekly: "Weekly",
+      now: "now",
+      d: "d",
+      h: "h",
+      m: "m",
+      aboutTitle: `Antigravity Tokens HUD ${HUD_VERSION}`,
+      aboutDesc: "Real-time token & quota monitor",
+      switchHint: "💡 Click widget to cycle language (Next: Русский)"
+    },
+    ru: {
+      code: "ru",
+      name: "Русский",
+      title5h: "5-часовой",
+      titleWeekly: "Недельный",
+      now: "сейчас",
+      d: "д",
+      h: "ч",
+      m: "м",
+      aboutTitle: `Antigravity Tokens HUD ${HUD_VERSION}`,
+      aboutDesc: "Мониторинг токенов и квот в реальном времени",
+      switchHint: "💡 Нажмите на виджет для смены языка (Далее: Français)"
+    },
+    fr: {
+      code: "fr",
+      name: "Français",
+      title5h: "Limite 5h",
+      titleWeekly: "Hebdo",
+      now: "maintenant",
+      d: "j",
+      h: "h",
+      m: "min",
+      aboutTitle: `Antigravity Tokens HUD ${HUD_VERSION}`,
+      aboutDesc: "Moniteur en temps réel des jetons et quotas",
+      switchHint: "💡 Cliquer sur le widget pour changer de langue (Suivant: 中文)"
+    },
+    zh: {
+      code: "zh",
+      name: "中文",
+      title5h: "5小时限额",
+      titleWeekly: "每周限额",
+      now: "现在",
+      d: "天",
+      h: "时",
+      m: "分",
+      aboutTitle: `Antigravity Tokens HUD ${HUD_VERSION}`,
+      aboutDesc: "实时令牌与配额监控",
+      switchHint: "💡 点击组件切换语言 (下一个: Español)"
+    }
+  };
+
+  const LANG_CYCLE = ["es", "en", "ru", "fr", "zh"];
+
+  function getSystemLanguage() {
+    try {
+      const navLang = (navigator.language || navigator.userLanguage || "es").toLowerCase();
+      if (navLang.startsWith("es")) return "es";
+      if (navLang.startsWith("ru")) return "ru";
+      if (navLang.startsWith("fr")) return "fr";
+      if (navLang.startsWith("zh")) return "zh";
+      if (navLang.startsWith("en")) return "en";
+    } catch (_) {}
+    return "es";
+  }
+
+  function formatResetTime(seconds, langCode) {
     if (!seconds) return "";
     const sec = parseInt(seconds, 10);
     if (isNaN(sec)) return "";
     const diff = sec - Math.floor(Date.now() / 1000);
-    if (diff <= 0) return isRu ? "сейчас" : "now";
+    const i18n = I18N[langCode] || I18N.es;
+    if (diff <= 0) return i18n.now;
     const days = Math.floor(diff / 86400);
     const hours = Math.floor((diff % 86400) / 3600);
     const mins = Math.floor((diff % 3600) / 60);
-    if (days > 0) return isRu ? `${days}д ${hours}ч` : `${days}d ${hours}h`;
-    if (hours > 0) return isRu ? `${hours}ч ${mins}м` : `${hours}h ${mins}m`;
-    return isRu ? `${mins}м` : `${mins}m`;
+    if (days > 0) return `${days}${i18n.d} ${hours}${i18n.h}`;
+    if (hours > 0) return `${hours}${i18n.h} ${mins}${i18n.m}`;
+    return `${mins}${i18n.m}`;
   }
 
   async function fetchOfficialQuotas() {
@@ -127,18 +212,19 @@
 
     let container = document.getElementById("antigravity-token-widget");
     const settingsBtn = Array.from(document.querySelectorAll("button")).find(b =>
-      b.textContent && (b.textContent.includes("Settings") || b.textContent.includes("Настройки"))
+      b.textContent && (b.textContent.includes("Settings") || b.textContent.includes("Настройки") || b.textContent.includes("Configuración"))
     );
-    if (!settingsBtn) return;
+    if (!settingsBtn || !settingsBtn.parentElement) return;
 
-    // Language resolution: localStorage > window.__AGY_LANG__ > default 'en'
-    let currentLang = "en";
+    // Language resolution: localStorage > System language (defaults to Español)
+    let currentLang = "es";
     try {
-      currentLang = localStorage.getItem("agy_hud_lang") || window.__AGY_LANG__ || "en";
+      currentLang = localStorage.getItem("agy_hud_lang") || getSystemLanguage();
     } catch (_) {
-      currentLang = window.__AGY_LANG__ || "en";
+      currentLang = getSystemLanguage();
     }
-    const isRu = currentLang === "ru";
+    if (!I18N[currentLang]) currentLang = "es";
+    const t = I18N[currentLang];
 
     if (!container) {
       container = document.createElement("div");
@@ -168,13 +254,16 @@
       };
 
       settingsBtn.parentElement.insertBefore(container, settingsBtn);
+    } else if (!container.isConnected || container.parentElement !== settingsBtn.parentElement) {
+      settingsBtn.parentElement.insertBefore(container, settingsBtn);
     }
 
     container.style.cursor = "pointer";
     container.onclick = (e) => {
       e.stopPropagation();
-      const current = localStorage.getItem("agy_hud_lang") || window.__AGY_LANG__ || "en";
-      const nextLang = current === "ru" ? "en" : "ru";
+      const current = localStorage.getItem("agy_hud_lang") || getSystemLanguage();
+      const currentIndex = LANG_CYCLE.indexOf(current);
+      const nextLang = LANG_CYCLE[(currentIndex + 1) % LANG_CYCLE.length];
       try {
         localStorage.setItem("agy_hud_lang", nextLang);
       } catch (_) {}
@@ -219,28 +308,25 @@
 
       if (hBucket?.remaining?.value != null) {
         fiveHourPct = Math.round(hBucket.remaining.value * 100);
-        fiveHourReset = formatResetTime(hBucket.resetTime?.seconds, isRu);
+        fiveHourReset = formatResetTime(hBucket.resetTime?.seconds, currentLang);
       }
       if (wBucket?.remaining?.value != null) {
         weeklyPct = Math.round(wBucket.remaining.value * 100);
-        weeklyReset = formatResetTime(wBucket.resetTime?.seconds, isRu);
+        weeklyReset = formatResetTime(wBucket.resetTime?.seconds, currentLang);
       }
     }
 
-    const title5h = isRu ? "5-часовой" : "5-Hour";
-    const titleWeekly = isRu ? "Недельный" : "Weekly";
-    const tip5h = isRu
-      ? `Остаток 5-часового лимита: ${fiveHourPct}%${fiveHourReset ? ` (сброс через ${fiveHourReset})` : ""}`
-      : `5-Hour limit remaining: ${fiveHourPct}%${fiveHourReset ? ` (reset in ${fiveHourReset})` : ""}`;
-    const tipWeekly = isRu
-      ? `Остаток недельного лимита: ${weeklyPct}%${weeklyReset ? ` (сброс через ${weeklyReset})` : ""}`
-      : `Weekly limit remaining: ${weeklyPct}%${weeklyReset ? ` (reset in ${weeklyReset})` : ""}`;
-    const switchHint = isRu ? "Нажмите для переключения на English" : "Click to switch to Russian";
-
-    container.title = `${tip5h}\n${tipWeekly}\n(${switchHint})`;
+    // Tooltip limpio enfocado en "Acerca de", versión y ayuda de cambio de idioma
+    container.title = [
+      `${t.aboutTitle}`,
+      `${t.aboutDesc}`,
+      "───────────────────────────────────────",
+      t.switchHint,
+      "(ES → EN → RU → FR → ZH)"
+    ].join("\n");
 
     container.innerHTML = `
-      <!-- 1. Model & Context (Наполняется слева направо) -->
+      <!-- 1. Model & Context -->
       <div style="margin-bottom: 6px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
           <span style="font-weight: 600; color: #f1f5f9; font-size: 10.5px;">${modelName}</span>
@@ -251,10 +337,10 @@
         </div>
       </div>
 
-      <!-- 2. 5-Hour Limit Remaining (Уменьшается справа налево) -->
+      <!-- 2. 5-Hour Limit Remaining -->
       <div style="margin-bottom: 6px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
-          <span style="font-weight: 500; color: #94a3b8; font-size: 10px;">${title5h}</span>
+          <span style="font-weight: 500; color: #94a3b8; font-size: 10px;">${t.title5h}</span>
           <span style="font-size: 9.5px; color: #94a3b8; font-weight: 500;">${fiveHourPct}% ${fiveHourReset ? `<span style="font-weight: 400; color: #64748b;">(${fiveHourReset})</span>` : ""}</span>
         </div>
         <div style="background: rgba(255,255,255,0.06); height: 3.5px; border-radius: 2px; overflow: hidden;">
@@ -262,10 +348,10 @@
         </div>
       </div>
 
-      <!-- 3. Weekly Limit Remaining (Уменьшается справа налево) -->
+      <!-- 3. Weekly Limit Remaining -->
       <div>
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
-          <span style="font-weight: 500; color: #94a3b8; font-size: 10px;">${titleWeekly}</span>
+          <span style="font-weight: 500; color: #94a3b8; font-size: 10px;">${t.titleWeekly}</span>
           <span style="font-size: 9.5px; color: #94a3b8; font-weight: 500;">${weeklyPct}% ${weeklyReset ? `<span style="font-weight: 400; color: #64748b;">(${weeklyReset})</span>` : ""}</span>
         </div>
         <div style="background: rgba(255,255,255,0.06); height: 3.5px; border-radius: 2px; overflow: hidden;">

@@ -6,11 +6,12 @@ Write-Host "🛑 Uninstalling Antigravity Tokens HUD..." -ForegroundColor Yellow
 $InstallDir = "$env:USERPROFILE\.antigravity-tokens-hud"
 $startupFolder = [Environment]::GetFolderPath("Startup")
 $vbsPath = "$startupFolder\antigravity-tokens-hud.vbs"
+$lnkPath = "$startupFolder\Antigravity Tokens HUD.lnk"
 
-if (Test-Path $vbsPath) {
-    Remove-Item $vbsPath -Force
-    Write-Host "✅ Removed Startup shortcut." -ForegroundColor Green
-}
+if (Test-Path $vbsPath) { Remove-Item $vbsPath -Force }
+if (Test-Path $lnkPath) { Remove-Item $lnkPath -Force }
+Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "Antigravity Tokens HUD" -ErrorAction SilentlyContinue
+Write-Host "✅ Removed Startup shortcut and registry entries." -ForegroundColor Green
 
 Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object { $_.Name -like "*node*" -and $_.CommandLine -like "*antigravity-tokens-hud*" } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
 
