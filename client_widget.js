@@ -95,9 +95,9 @@
       d: "d",
       h: "h",
       m: "m",
-      aboutTitle: "Antigravity Tokens HUD",
-      statusActive: "Active",
-      updatedLabel: "Updated",
+      pluginName: "Antigravity Tokens HUD",
+      versionStatus: "Actualizado: 26 oct 2026 • Al día ✓",
+      description: "Monitor en tiempo real de consumo de tokens y cuotas oficiales de Antigravity.",
       switchHint: "💡 Clic para alternar idioma (Siguiente: English)"
     },
     en: {
@@ -109,9 +109,9 @@
       d: "d",
       h: "h",
       m: "m",
-      aboutTitle: "Antigravity Tokens HUD",
-      statusActive: "Active",
-      updatedLabel: "Updated",
+      pluginName: "Antigravity Tokens HUD",
+      versionStatus: "Updated: Oct 26, 2026 • Up to date ✓",
+      description: "Real-time session token usage and official Antigravity quota monitor.",
       switchHint: "💡 Click widget to cycle language (Next: Русский)"
     },
     ru: {
@@ -123,9 +123,9 @@
       d: "д",
       h: "ч",
       m: "м",
-      aboutTitle: "Antigravity Tokens HUD",
-      statusActive: "Active",
-      updatedLabel: "Updated",
+      pluginName: "Antigravity Tokens HUD",
+      versionStatus: "Обновлено: 26 окт 2026 • Актуально ✓",
+      description: "Мониторинг токенов сессий и официальных квот Antigravity в реальном времени.",
       switchHint: "💡 Кликните для смены языка (Далее: Français)"
     },
     fr: {
@@ -137,9 +137,9 @@
       d: "j",
       h: "h",
       m: "min",
-      aboutTitle: "Antigravity Tokens HUD",
-      statusActive: "Active",
-      updatedLabel: "Updated",
+      pluginName: "Antigravity Tokens HUD",
+      versionStatus: "Mis à jour: 26 oct 2026 • À jour ✓",
+      description: "Moniteur en temps réel de contexte de session et quotas officiels Antigravity.",
       switchHint: "💡 Cliquer pour changer de langue (Suivant: 中文)"
     },
     zh: {
@@ -151,9 +151,9 @@
       d: "天",
       h: "时",
       m: "分",
-      aboutTitle: "Antigravity Tokens HUD",
-      statusActive: "Active",
-      updatedLabel: "Updated",
+      pluginName: "Antigravity Tokens HUD",
+      versionStatus: "更新于: 2026年10月26日 • 已是最新 ✓",
+      description: "实时会话上下文大小与官方 Antigravity 模型配额监视器。",
       switchHint: "💡 点击组件切换语言 (下一个: Español)"
     }
   };
@@ -373,43 +373,34 @@
       document.body.appendChild(tooltipEl);
     }
 
-    const currentProject = getActiveProjectName();
-
     tooltipEl.innerHTML = `
-      <!-- 1. Título Principal -->
-      <div style="font-size: 13.5px; font-weight: 600; color: #ffffff; letter-spacing: -0.2px; margin-bottom: 7px;">
-        ${t.aboutTitle}
+      <!-- 1. Nombre del Plugin (En negrita) y Versión en color llamativo -->
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 7px;">
+        <span style="font-size: 13.5px; font-weight: 700; color: #ffffff; letter-spacing: -0.2px;">
+          ${t.pluginName}
+        </span>
+        <span style="font-size: 11px; font-weight: 700; background: rgba(56, 189, 248, 0.16); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); padding: 1px 7px; border-radius: 9999px; letter-spacing: 0.3px; text-shadow: 0 0 10px rgba(56, 189, 248, 0.4);">
+          ${HUD_VERSION}
+        </span>
       </div>
 
-      <!-- 2. Carpeta / Proyecto Activo (igual a la imagen) -->
-      <div style="display: flex; align-items: center; gap: 7px; color: #9ca3af; font-size: 11.5px; margin-bottom: 5px;">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; opacity: 0.85;">
-          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-        </svg>
-        <span style="font-weight: 500; letter-spacing: 0.3px;">${currentProject}</span>
-      </div>
-
-      <!-- 3. Estado Activo (con icono de check en círculo) -->
-      <div style="display: flex; align-items: center; gap: 7px; color: #9ca3af; font-size: 11.5px; margin-bottom: 5px;">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; opacity: 0.85;">
+      <!-- 2. Fecha de Actualización y verificación de nueva versión -->
+      <div style="display: flex; align-items: center; gap: 6px; color: #34d399; font-size: 11px; font-weight: 500; margin-bottom: 7px;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
           <circle cx="12" cy="12" r="10"/>
           <path d="m9 12 2 2 4-4"/>
         </svg>
-        <span>Active</span>
+        <span>${t.versionStatus}</span>
       </div>
 
-      <!-- 4. Hora de Actualización (con icono de reloj) -->
-      <div style="display: flex; align-items: center; gap: 7px; color: #9ca3af; font-size: 11.5px; margin-bottom: 7px;">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; opacity: 0.85;">
-          <circle cx="12" cy="12" r="10"/>
-          <polyline points="12 6 12 12 16 14"/>
-        </svg>
-        <span>Updated ${lastUpdateTime}</span>
+      <!-- 3. Breve descripción -->
+      <div style="color: #94a3b8; font-size: 11.5px; line-height: 1.4; margin-bottom: 9px;">
+        ${t.description}
       </div>
 
-      <!-- 5. Repositorio de GitHub (clicable) -->
+      <!-- 4. Repo de GitHub -->
       <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 8px;">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink: 0; color: #38bdf8;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink: 0; color: #cbd5e1;">
           <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
         </svg>
         <span id="agy-gh-link" style="color: #38bdf8; font-size: 11px; font-weight: 500; cursor: pointer; text-decoration: underline;">
@@ -417,10 +408,10 @@
         </span>
       </div>
 
-      <!-- 6. Separador tenue -->
-      <div style="border-top: 1px solid rgba(255, 255, 255, 0.07); margin: 7px 0;"></div>
+      <!-- 5. Separador tenue (-------) -->
+      <div style="border-top: 1px solid rgba(255, 255, 255, 0.08); margin: 7px 0 6px 0;"></div>
 
-      <!-- 7. Indicador de cambio de idioma -->
+      <!-- 6. Indicador de cambio de idioma -->
       <div style="color: #64748b; font-size: 10.5px; line-height: 1.35;">
         ${t.switchHint}
         <div style="margin-top: 2px; opacity: 0.75; font-size: 10px;">(ES → EN → RU → FR → ZH)</div>
