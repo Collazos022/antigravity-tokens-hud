@@ -61,6 +61,20 @@
     return "gemini-3.8-flash";
   }
 
+  function getActiveProjectName() {
+    try {
+      const title = document.title || "";
+      const parts = title.split(" - ");
+      if (parts.length >= 2 && parts[1]) {
+        const proj = parts[1].trim();
+        if (proj && proj !== "Antigravity") return proj;
+      }
+      const sel = document.querySelector("[data-selected=\"true\"]");
+      if (sel && sel.innerText) return sel.innerText.trim();
+    } catch (_) {}
+    return "MODELADO 3D";
+  }
+
   function fmtK(n) {
     if (!n || n <= 0) return "0";
     if (n >= 1000000) return (n / 1000000).toFixed(1) + "M";
@@ -69,6 +83,7 @@
   }
 
   const HUD_VERSION = "v1.1.0";
+  const GITHUB_REPO_URL = "https://github.com/Collazos022/antigravity-tokens-hud";
 
   const I18N = {
     es: {
@@ -80,9 +95,10 @@
       d: "d",
       h: "h",
       m: "m",
-      aboutTitle: `Antigravity Tokens HUD ${HUD_VERSION}`,
-      aboutDesc: "Monitor en tiempo real de tokens y cuotas",
-      switchHint: "💡 Haz clic en el widget para alternar idioma (Siguiente: English)"
+      aboutTitle: "Antigravity Tokens HUD",
+      statusActive: "Active",
+      updatedLabel: "Updated",
+      switchHint: "💡 Clic para alternar idioma (Siguiente: English)"
     },
     en: {
       code: "en",
@@ -93,8 +109,9 @@
       d: "d",
       h: "h",
       m: "m",
-      aboutTitle: `Antigravity Tokens HUD ${HUD_VERSION}`,
-      aboutDesc: "Real-time token & quota monitor",
+      aboutTitle: "Antigravity Tokens HUD",
+      statusActive: "Active",
+      updatedLabel: "Updated",
       switchHint: "💡 Click widget to cycle language (Next: Русский)"
     },
     ru: {
@@ -106,9 +123,10 @@
       d: "д",
       h: "ч",
       m: "м",
-      aboutTitle: `Antigravity Tokens HUD ${HUD_VERSION}`,
-      aboutDesc: "Мониторинг токенов и квот в реальном времени",
-      switchHint: "💡 Нажмите на виджет для смены языка (Далее: Français)"
+      aboutTitle: "Antigravity Tokens HUD",
+      statusActive: "Active",
+      updatedLabel: "Updated",
+      switchHint: "💡 Кликните для смены языка (Далее: Français)"
     },
     fr: {
       code: "fr",
@@ -119,9 +137,10 @@
       d: "j",
       h: "h",
       m: "min",
-      aboutTitle: `Antigravity Tokens HUD ${HUD_VERSION}`,
-      aboutDesc: "Moniteur en temps réel des jetons et quotas",
-      switchHint: "💡 Cliquer sur le widget pour changer de langue (Suivant: 中文)"
+      aboutTitle: "Antigravity Tokens HUD",
+      statusActive: "Active",
+      updatedLabel: "Updated",
+      switchHint: "💡 Cliquer pour changer de langue (Suivant: 中文)"
     },
     zh: {
       code: "zh",
@@ -132,8 +151,9 @@
       d: "天",
       h: "时",
       m: "分",
-      aboutTitle: `Antigravity Tokens HUD ${HUD_VERSION}`,
-      aboutDesc: "实时令牌与配额监控",
+      aboutTitle: "Antigravity Tokens HUD",
+      statusActive: "Active",
+      updatedLabel: "Updated",
       switchHint: "💡 点击组件切换语言 (下一个: Español)"
     }
   };
@@ -205,6 +225,8 @@
     }
     return cachedQuotas;
   }
+
+  let lastUpdateTime = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 
   window.__AGY_RENDER__ = async function() {
     const data = window.__AGY_DATA__;
@@ -316,14 +338,132 @@
       }
     }
 
-    // Tooltip limpio enfocado en "Acerca de", versión y ayuda de cambio de idioma
-    container.title = [
-      `${t.aboutTitle}`,
-      `${t.aboutDesc}`,
-      "───────────────────────────────────────",
-      t.switchHint,
-      "(ES → EN → RU → FR → ZH)"
-    ].join("\n");
+    // Remueve el tooltip nativo de Windows
+    container.removeAttribute("title");
+
+    // -------------------------------------------------------------
+    // TOOLTIP ESTILIZADO IDÉNTICO A LA INTERFAZ DE ANTIGRAVITY
+    // -------------------------------------------------------------
+    let tooltipEl = document.getElementById("antigravity-token-tooltip");
+    if (!tooltipEl) {
+      tooltipEl = document.createElement("div");
+      tooltipEl.id = "antigravity-token-tooltip";
+      tooltipEl.style.cssText = [
+        "position: fixed",
+        "z-index: 9999999",
+        "background: rgba(28, 28, 30, 0.98)",
+        "backdrop-filter: blur(20px)",
+        "-webkit-backdrop-filter: blur(20px)",
+        "border: 1px solid rgba(255, 255, 255, 0.08)",
+        "border-radius: 14px",
+        "padding: 12px 16px",
+        "box-shadow: 0 10px 32px rgba(0, 0, 0, 0.65)",
+        "color: #e2e8f0",
+        "font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+        "font-size: 12px",
+        "line-height: 1.4",
+        "opacity: 0",
+        "transform: translateX(4px)",
+        "transition: opacity 0.16s ease, transform 0.16s ease",
+        "pointer-events: none",
+        "min-width: 250px",
+        "max-width: 320px",
+        "user-select: none"
+      ].join("; ");
+      document.body.appendChild(tooltipEl);
+    }
+
+    const currentProject = getActiveProjectName();
+
+    tooltipEl.innerHTML = `
+      <!-- 1. Título Principal -->
+      <div style="font-size: 13.5px; font-weight: 600; color: #ffffff; letter-spacing: -0.2px; margin-bottom: 7px;">
+        ${t.aboutTitle}
+      </div>
+
+      <!-- 2. Carpeta / Proyecto Activo (igual a la imagen) -->
+      <div style="display: flex; align-items: center; gap: 7px; color: #9ca3af; font-size: 11.5px; margin-bottom: 5px;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; opacity: 0.85;">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+        </svg>
+        <span style="font-weight: 500; letter-spacing: 0.3px;">${currentProject}</span>
+      </div>
+
+      <!-- 3. Estado Activo (con icono de check en círculo) -->
+      <div style="display: flex; align-items: center; gap: 7px; color: #9ca3af; font-size: 11.5px; margin-bottom: 5px;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; opacity: 0.85;">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="m9 12 2 2 4-4"/>
+        </svg>
+        <span>Active</span>
+      </div>
+
+      <!-- 4. Hora de Actualización (con icono de reloj) -->
+      <div style="display: flex; align-items: center; gap: 7px; color: #9ca3af; font-size: 11.5px; margin-bottom: 7px;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; opacity: 0.85;">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+        <span>Updated ${lastUpdateTime}</span>
+      </div>
+
+      <!-- 5. Repositorio de GitHub (clicable) -->
+      <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 8px;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink: 0; color: #38bdf8;">
+          <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+        </svg>
+        <span id="agy-gh-link" style="color: #38bdf8; font-size: 11px; font-weight: 500; cursor: pointer; text-decoration: underline;">
+          Collazos022/antigravity-tokens-hud ↗
+        </span>
+      </div>
+
+      <!-- 6. Separador tenue -->
+      <div style="border-top: 1px solid rgba(255, 255, 255, 0.07); margin: 7px 0;"></div>
+
+      <!-- 7. Indicador de cambio de idioma -->
+      <div style="color: #64748b; font-size: 10.5px; line-height: 1.35;">
+        ${t.switchHint}
+        <div style="margin-top: 2px; opacity: 0.75; font-size: 10px;">(ES → EN → RU → FR → ZH)</div>
+      </div>
+    `;
+
+    const ghLink = document.getElementById("agy-gh-link");
+    if (ghLink) {
+      ghLink.onclick = (e) => {
+        e.stopPropagation();
+        window.open(GITHUB_REPO_URL, "_blank");
+      };
+    }
+
+    if (!window.__AGY_TOOLTIP_BOUND__) {
+      window.__AGY_TOOLTIP_BOUND__ = true;
+      let hideTimer = null;
+
+      function show() {
+        if (hideTimer) clearTimeout(hideTimer);
+        const rect = container.getBoundingClientRect();
+        tooltipEl.style.left = (rect.right + 12) + "px";
+        tooltipEl.style.bottom = (window.innerHeight - rect.bottom) + "px";
+        tooltipEl.style.opacity = "1";
+        tooltipEl.style.transform = "translateX(0)";
+        tooltipEl.style.pointerEvents = "auto";
+      }
+
+      function hide() {
+        hideTimer = setTimeout(() => {
+          tooltipEl.style.opacity = "0";
+          tooltipEl.style.transform = "translateX(4px)";
+          tooltipEl.style.pointerEvents = "none";
+        }, 180);
+      }
+
+      container.addEventListener("mouseenter", show);
+      container.addEventListener("mouseleave", hide);
+      tooltipEl.addEventListener("mouseenter", () => {
+        if (hideTimer) clearTimeout(hideTimer);
+      });
+      tooltipEl.addEventListener("mouseleave", hide);
+    }
 
     container.innerHTML = `
       <!-- 1. Model & Context -->
