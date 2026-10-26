@@ -3,7 +3,7 @@
 # Antigravity Tokens HUD 📊
 
 [![Antigravity](https://img.shields.io/badge/Antigravity-2.0-blue.svg)](https://antigravity.google)
-[![Version](https://img.shields.io/badge/Version-v1.2.0-brightgreen.svg)](package.json)
+[![Version](https://img.shields.io/badge/Version-v1.1.0-brightgreen.svg)](package.json)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Windows-0078D6.svg)](https://microsoft.com)
 [![Languages](https://img.shields.io/badge/Languages-ES%20|%20EN%20|%20RU%20|%20FR%20|%20ZH-green.svg)](#idiomas-soportados)
@@ -29,7 +29,7 @@ Inyectado de forma nativa e imperceptible en la barra lateral de la interfaz de 
 Al pasar el cursor sobre el widget se despliega la tarjeta de información y versión sin datos redundantes:
 
 ```text
-Antigravity Tokens HUD v1.2.0
+Antigravity Tokens HUD v1.1.0
 Monitor en tiempo real de tokens y cuotas
 ───────────────────────────────────────
 💡 Haz clic en el widget para alternar idioma (Siguiente: English)
@@ -45,7 +45,7 @@ Monitor en tiempo real de tokens y cuotas
 | **Contexto de Sesión Activa** | Muestra el consumo exacto de tokens y el porcentaje de llenado de la ventana de contexto de la conversación actual (ej. `129k / 1M`). Se actualiza automáticamente al cambiar de chat. |
 | **Límite Rodante de 5 Horas** | Porcentaje de cuota restante en la ventana de 5 horas y cuenta regresiva exacta para el reseteo. |
 | **Cuota Semanal** | Porcentaje disponible de tu cuota semanal asignada por Google Antigravity. |
-| **Tooltip "Acerca de" con Versión** | Información detallada con la versión actual (`v1.2.0`), cuotas exactas y guía de cambio de idioma. |
+| **Tooltip "Acerca de" con Versión** | Información detallada con la versión actual (`v1.1.0`), cuotas exactas y guía de cambio de idioma. |
 | **Soporte Multilingüe (5 Idiomas)** | Detecta el idioma del sistema y permite alternar dinámicamente con un solo clic. |
 | **Cero Impacto en el Agente** | Corre como un servicio local en segundo plano; no consume tokens de contexto de tus conversaciones. |
 | **Arranque Silencioso** | Se inicia automáticamente con Windows a través de un script VBS en segundo plano sin ventanas de consola. |
@@ -70,12 +70,12 @@ Este repositorio es una derivación enriquecida desarrollada sobre el proyecto o
 
 ### 🚀 Diferencias Clave e Innovaciones
 
-| Característica | Proyecto Base Original | Esta Derivación (`v1.2.0`) |
+| Característica | Proyecto Base Original | Esta Derivación (`v1.1.0`) |
 | :--- | :--- | :--- |
 | **Persistencia y Watchdog** | Requiere reinicio manual por consola si la app se cierra. | **Demonio Inmortal (`index.js`):** Auto-reconexión a puertos dinámicos (`DevToolsActivePort`), recuperación tras reinicios de Antigravity y bypass automático del alias roto de Microsoft Store para Python. |
 | **Internacionalización** | Solo Inglés estático. | **Multilingüe dinámico:** Soporta Español (por defecto), Inglés, Ruso, Francés y Chino con autodetección de sistema y alternancia interactiva por clic persistida en `localStorage`. |
 | **Integración con Windows** | Script genérico en segundo plano. | **Acceso Directo con Logotipo Oficial:** Icono multirresolución (`.ico`), registro en Aplicaciones de Inicio (`HKCU\...\Run`) e instaladores/desinstaladores automáticos de 1 clic (`install.bat` / `uninstall.bat`). |
-| **Interfaz y Tooltip** | Métricas repetidas en tooltip. | **UX Limpia:** Tooltip estilizado con versión SemVer `v1.2.0`, guía rápida de idioma y eliminación de redundancias numéricas. |
+| **Interfaz y Tooltip** | Métricas repetidas en tooltip. | **UX Limpia:** Tooltip estilizado con versión SemVer `v1.1.0`, guía rápida de idioma y eliminación de redundancias numéricas. |
 | **Licencia y Atribución** | MIT por @myslithell. | **Preservada al 100%** bajo licencia MIT, reconociendo y acreditando la autoría base. |
 
 ---
@@ -147,4 +147,4 @@ Si este HUD te es de utilidad para optimizar tu flujo de trabajo en **Google Ant
 Este proyecto se distribuye bajo la Licencia [MIT](LICENSE).
 
 * **Autoría del Proyecto Base:** [`myslithell`](https://github.com/myslithell) por la concepción inicial de la inyección de telemetría por CDP.
-* **Derivación y Mejoras de Producción:** [`Collazos022`](https://github.com/Collazos022) — Demonio watchdog persistente, soporte multilingüe (ES, EN, RU, FR, ZH), empaquetado de arranque e instaladores de 1 clic para Windows, e identidad visual (`v1.2.0`).
+* **Derivación y Mejoras de Producción:** [`Collazos022`](https://github.com/Collazos022) — Demonio watchdog persistente, soporte multilingüe (ES, EN, RU, FR, ZH), empaquetado de arranque e instaladores de 1 clic para Windows, e identidad visual (`v1.1.0`).
