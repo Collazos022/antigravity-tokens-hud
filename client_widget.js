@@ -426,35 +426,36 @@
       };
     }
 
-    if (!window.__AGY_TOOLTIP_BOUND__) {
-      window.__AGY_TOOLTIP_BOUND__ = true;
-      let hideTimer = null;
+    let hideTimer = window.__AGY_HIDE_TIMER__ || null;
 
-      function show() {
-        if (hideTimer) clearTimeout(hideTimer);
-        const rect = container.getBoundingClientRect();
-        tooltipEl.style.left = (rect.right + 12) + "px";
-        tooltipEl.style.bottom = (window.innerHeight - rect.bottom) + "px";
-        tooltipEl.style.opacity = "1";
-        tooltipEl.style.transform = "translateX(0)";
-        tooltipEl.style.pointerEvents = "auto";
-      }
-
-      function hide() {
-        hideTimer = setTimeout(() => {
-          tooltipEl.style.opacity = "0";
-          tooltipEl.style.transform = "translateX(4px)";
-          tooltipEl.style.pointerEvents = "none";
-        }, 180);
-      }
-
-      container.addEventListener("mouseenter", show);
-      container.addEventListener("mouseleave", hide);
-      tooltipEl.addEventListener("mouseenter", () => {
-        if (hideTimer) clearTimeout(hideTimer);
-      });
-      tooltipEl.addEventListener("mouseleave", hide);
+    function showTooltip(target) {
+      if (hideTimer) clearTimeout(hideTimer);
+      const el = target || container;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      tooltipEl.style.left = (rect.right + 12) + "px";
+      tooltipEl.style.bottom = (window.innerHeight - rect.bottom) + "px";
+      tooltipEl.style.opacity = "1";
+      tooltipEl.style.transform = "translateX(0)";
+      tooltipEl.style.pointerEvents = "auto";
     }
+
+    function hideTooltip() {
+      if (hideTimer) clearTimeout(hideTimer);
+      hideTimer = setTimeout(() => {
+        tooltipEl.style.opacity = "0";
+        tooltipEl.style.transform = "translateX(4px)";
+        tooltipEl.style.pointerEvents = "none";
+      }, 180);
+      window.__AGY_HIDE_TIMER__ = hideTimer;
+    }
+
+    container.onmouseenter = (e) => showTooltip(e.currentTarget);
+    container.onmouseleave = () => hideTooltip();
+    tooltipEl.onmouseenter = () => {
+      if (hideTimer) clearTimeout(hideTimer);
+    };
+    tooltipEl.onmouseleave = () => hideTooltip();
 
     container.innerHTML = `
       <!-- 1. Model & Context -->
