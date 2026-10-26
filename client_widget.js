@@ -355,37 +355,36 @@
         "backdrop-filter: blur(20px)",
         "-webkit-backdrop-filter: blur(20px)",
         "border: 1px solid rgba(255, 255, 255, 0.08)",
-        "border-radius: 14px",
-        "padding: 12px 16px",
+        "border-radius: 12px",
+        "padding: 10px 12px",
         "box-shadow: 0 10px 32px rgba(0, 0, 0, 0.65)",
         "color: #e2e8f0",
         "font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-        "font-size: 12px",
-        "line-height: 1.4",
+        "font-size: 11.5px",
+        "line-height: 1.35",
         "opacity: 0",
-        "transform: translateX(4px)",
+        "transform: translateY(4px)",
         "transition: opacity 0.16s ease, transform 0.16s ease",
         "pointer-events: none",
-        "min-width: 250px",
-        "max-width: 320px",
+        "box-sizing: border-box",
         "user-select: none"
       ].join("; ");
       document.body.appendChild(tooltipEl);
     }
 
     tooltipEl.innerHTML = `
-      <!-- 1. Nombre del Plugin (En negrita) y Versión en color llamativo -->
-      <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 7px;">
-        <span style="font-size: 13.5px; font-weight: 700; color: #ffffff; letter-spacing: -0.2px;">
+      <!-- 1. Nombre del Plugin (En negrita) y Versión contigua más pequeña -->
+      <div style="display: flex; align-items: baseline; gap: 6px; margin-bottom: 5px; flex-wrap: wrap;">
+        <span style="font-size: 12px; font-weight: 700; color: #ffffff; letter-spacing: -0.2px;">
           ${t.pluginName}
         </span>
-        <span style="font-size: 11px; font-weight: 700; background: rgba(56, 189, 248, 0.16); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); padding: 1px 7px; border-radius: 9999px; letter-spacing: 0.3px; text-shadow: 0 0 10px rgba(56, 189, 248, 0.4);">
+        <span style="font-size: 9.5px; font-weight: 600; background: rgba(56, 189, 248, 0.14); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35); padding: 0.5px 5px; border-radius: 9999px; letter-spacing: 0.2px;">
           ${HUD_VERSION}
         </span>
       </div>
 
       <!-- 2. Fecha de Actualización y verificación de nueva versión -->
-      <div style="display: flex; align-items: center; gap: 6px; color: #34d399; font-size: 11px; font-weight: 500; margin-bottom: 7px;">
+      <div style="display: flex; align-items: center; gap: 6px; color: #34d399; font-size: 10.5px; font-weight: 500; margin-bottom: 6px;">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
           <circle cx="12" cy="12" r="10"/>
           <path d="m9 12 2 2 4-4"/>
@@ -394,27 +393,27 @@
       </div>
 
       <!-- 3. Breve descripción -->
-      <div style="color: #94a3b8; font-size: 11.5px; line-height: 1.4; margin-bottom: 9px;">
+      <div style="color: #94a3b8; font-size: 11px; line-height: 1.35; margin-bottom: 8px;">
         ${t.description}
       </div>
 
       <!-- 4. Repo de GitHub -->
-      <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 8px;">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink: 0; color: #cbd5e1;">
+      <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 7px;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink: 0; color: #cbd5e1;">
           <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
         </svg>
-        <span id="agy-gh-link" style="color: #38bdf8; font-size: 11px; font-weight: 500; cursor: pointer; text-decoration: underline;">
+        <span id="agy-gh-link" style="color: #38bdf8; font-size: 10.5px; font-weight: 500; cursor: pointer; text-decoration: underline;">
           Collazos022/antigravity-tokens-hud ↗
         </span>
       </div>
 
       <!-- 5. Separador tenue (-------) -->
-      <div style="border-top: 1px solid rgba(255, 255, 255, 0.08); margin: 7px 0 6px 0;"></div>
+      <div style="border-top: 1px solid rgba(255, 255, 255, 0.08); margin: 6px 0 5px 0;"></div>
 
       <!-- 6. Indicador de cambio de idioma -->
-      <div style="color: #64748b; font-size: 10.5px; line-height: 1.35;">
+      <div style="color: #64748b; font-size: 10px; line-height: 1.3;">
         ${t.switchHint}
-        <div style="margin-top: 2px; opacity: 0.75; font-size: 10px;">(ES → EN → RU → FR → ZH)</div>
+        <div style="margin-top: 2px; opacity: 0.75; font-size: 9.5px;">(ES → EN → RU → FR → ZH)</div>
       </div>
     `;
 
@@ -433,10 +432,11 @@
       const el = target || container;
       if (!el) return;
       const rect = el.getBoundingClientRect();
-      tooltipEl.style.left = (rect.right + 12) + "px";
-      tooltipEl.style.bottom = (window.innerHeight - rect.bottom) + "px";
+      tooltipEl.style.left = rect.left + "px";
+      tooltipEl.style.width = rect.width + "px";
+      tooltipEl.style.bottom = (window.innerHeight - rect.top + 6) + "px";
       tooltipEl.style.opacity = "1";
-      tooltipEl.style.transform = "translateX(0)";
+      tooltipEl.style.transform = "translateY(0)";
       tooltipEl.style.pointerEvents = "auto";
     }
 
@@ -444,7 +444,7 @@
       if (hideTimer) clearTimeout(hideTimer);
       hideTimer = setTimeout(() => {
         tooltipEl.style.opacity = "0";
-        tooltipEl.style.transform = "translateX(4px)";
+        tooltipEl.style.transform = "translateY(4px)";
         tooltipEl.style.pointerEvents = "none";
       }, 180);
       window.__AGY_HIDE_TIMER__ = hideTimer;
