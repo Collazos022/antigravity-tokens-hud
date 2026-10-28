@@ -136,25 +136,15 @@ Write-Host "⚙️ Configurando arranque automático e icono en Aplicaciones de 
 $startupFolder = [Environment]::GetFolderPath("Startup")
 $oldVbs = Join-Path $startupFolder "antigravity-tokens-hud.vbs"
 if (Test-Path $oldVbs) { Remove-Item -Path $oldVbs -Force -ErrorAction SilentlyContinue }
+$oldLnk = Join-Path $startupFolder "Antigravity Tokens HUD.lnk"
+if (Test-Path $oldLnk) { Remove-Item -Path $oldLnk -Force -ErrorAction SilentlyContinue }
 
-$iconPath = "$InstallDir\assets\icon.ico"
-$lnkPath = Join-Path $startupFolder "Antigravity Tokens HUD.lnk"
-
-$wshShell = New-Object -ComObject WScript.Shell
-$shortcut = $wshShell.CreateShortcut($lnkPath)
+# Registro único en HKCU:\...\Run para visualización limpia sin duplicados en el Administrador de Tareas
 if (Test-Path $exePath) {
-    $shortcut.TargetPath = $exePath
-    $shortcut.IconLocation = "$exePath,0"
     Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "Antigravity Tokens HUD" -Value "`"$exePath`"" -Force
 } else {
-    $shortcut.TargetPath = "node.exe"
-    $shortcut.Arguments = "`"$InstallDir\index.js`""
-    $shortcut.IconLocation = "$iconPath,0"
     Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "Antigravity Tokens HUD" -Value "`"node.exe`" `"$InstallDir\index.js`"" -Force
 }
-$shortcut.WorkingDirectory = $InstallDir
-$shortcut.Description = "Antigravity Tokens HUD"
-$shortcut.Save()
 
 # 6. Registrar Plugin Oficial en Antigravity (Customizations)
 Write-Host "🔌 Registrando plugin oficial en Antigravity Customizations..." -ForegroundColor Yellow
