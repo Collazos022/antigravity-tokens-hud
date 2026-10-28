@@ -3,7 +3,7 @@
 # Antigravity Tokens HUD 📊
 
 [![Antigravity](https://img.shields.io/badge/Antigravity-2.0-blue.svg)](https://antigravity.google)
-[![Version](https://img.shields.io/badge/Version-v1.1.0-brightgreen.svg)](package.json)
+[![Version](https://img.shields.io/badge/Version-v1.1.1-brightgreen.svg)](package.json)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Windows-0078D6.svg)](https://microsoft.com)
 [![Languages](https://img.shields.io/badge/Languages-ES%20|%20EN%20|%20RU%20|%20FR%20|%20ZH-green.svg)](#idiomas-soportados)
@@ -29,7 +29,7 @@ Inyectado de forma nativa e imperceptible en la barra lateral de la interfaz de 
 Al pasar el cursor sobre el widget se despliega la tarjeta de información y versión sin datos redundantes:
 
 ```text
-Antigravity Tokens HUD v1.1.0
+Antigravity Tokens HUD v1.1.1
 Monitor en tiempo real de tokens y cuotas
 ───────────────────────────────────────
 💡 Haz clic en el widget para alternar idioma (Siguiente: English)
@@ -71,12 +71,12 @@ Este repositorio es una derivación enriquecida desarrollada sobre el proyecto o
 
 ### 🚀 Diferencias Clave e Innovaciones
 
-| Característica | Proyecto Base Original | Esta Derivación (`v1.1.0`) |
+| Característica | Proyecto Base Original | Esta Derivación (`v1.1.1`) |
 | :--- | :--- | :--- |
-| **Persistencia y Watchdog** | Requiere reinicio manual por consola si la app se cierra. | **Demonio Inmortal (`index.js`):** Auto-reconexión a puertos dinámicos (`DevToolsActivePort`), recuperación tras reinicios de Antigravity y bypass automático del alias roto de Microsoft Store para Python. |
+| **Persistencia y Watchdog** | Requiere reinicio manual por consola si la app se cierra. | **Daemon Inmortal (`index.js`):** Auto-reconexión a puertos dinámicos (`DevToolsActivePort`), recuperación tras reinicios de Antigravity, sincronización de estado (se oculta al deshabilitar y pausa Python) y auto-desinstalación limpia al remover en Customizations. |
 | **Internacionalización** | Solo Inglés estático. | **Multilingüe dinámico:** Soporta Español (por defecto), Inglés, Ruso, Francés y Chino con autodetección de sistema y alternancia interactiva por clic persistida en `localStorage`. |
-| **Integración con Windows** | Script genérico en segundo plano. | **Acceso Directo con Logotipo Oficial:** Icono multirresolución (`.ico`), registro en Aplicaciones de Inicio (`HKCU\...\Run`) e instaladores/desinstaladores automáticos de 1 clic (`install.bat` / `uninstall.bat`). |
-| **Interfaz y Tooltip** | Métricas repetidas en tooltip. | **UX Limpia:** Tooltip estilizado con versión SemVer `v1.1.0`, guía rápida de idioma y eliminación de redundancias numéricas. |
+| **Integración con Windows** | Script genérico en segundo plano. | **Lanzador Nativo con Logotipo Oficial:** Ejecutable silencioso (`Antigravity Tokens HUD.exe`) con icono multirresolución (`.ico`), registro limpio en Aplicaciones de Inicio (`HKCU\...\Run`) e instaladores/desinstaladores automáticos de 1 clic (`install.bat` / `uninstall.bat`). |
+| **Interfaz y Tooltip** | Métricas repetidas en tooltip. | **UX Limpia:** Tooltip estilizado con versión SemVer `v1.1.1`, guía rápida de idioma y eliminación de redundancias numéricas. |
 | **Licencia y Atribución** | MIT por @myslithell. | **Preservada al 100%** bajo licencia MIT, reconociendo y acreditando la autoría base. |
 
 ---

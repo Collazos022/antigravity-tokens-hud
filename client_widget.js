@@ -1,4 +1,16 @@
 (() => {
+  window.__AGY_CLEANUP__ = function() {
+    const w = document.getElementById("antigravity-token-widget");
+    if (w) w.remove();
+    const p = document.getElementById("agy-hud-popover");
+    if (p) p.remove();
+  };
+
+  if (window.__AGY_ENABLED__ === false) {
+    window.__AGY_CLEANUP__();
+    return;
+  }
+
   function getActiveConvId() {
     try {
       // 1. TanStack Router state (official router of Antigravity 2.0)
@@ -82,7 +94,7 @@
     return n + "";
   }
 
-  const HUD_VERSION = "v1.1.0";
+  const HUD_VERSION = "v1.1.1";
   const GITHUB_REPO_URL = "https://github.com/Collazos022/antigravity-tokens-hud";
 
   const I18N = {
@@ -96,7 +108,7 @@
       h: "h",
       m: "m",
       pluginName: "Antigravity Tokens HUD",
-      versionStatus: "Actualizado: 26 oct 2026 • Al día ✓",
+      versionStatus: "Actualizado: 28 oct 2026 • Al día ✓",
       description: "Monitor en tiempo real de consumo de tokens y cuotas oficiales de Antigravity.",
       switchHint: "💡 Clic para alternar idioma (Siguiente: English)"
     },
@@ -110,7 +122,7 @@
       h: "h",
       m: "m",
       pluginName: "Antigravity Tokens HUD",
-      versionStatus: "Updated: Oct 26, 2026 • Up to date ✓",
+      versionStatus: "Updated: Oct 28, 2026 • Up to date ✓",
       description: "Real-time session token usage and official Antigravity quota monitor.",
       switchHint: "💡 Click widget to cycle language (Next: Русский)"
     },
@@ -229,6 +241,10 @@
   let lastUpdateTime = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 
   window.__AGY_RENDER__ = async function() {
+    if (window.__AGY_ENABLED__ === false) {
+      if (window.__AGY_CLEANUP__) window.__AGY_CLEANUP__();
+      return;
+    }
     const data = window.__AGY_DATA__;
     if (!data) return;
 

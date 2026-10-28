@@ -99,7 +99,7 @@ if (-not (Test-Path "$InstallDir\assets")) {
     New-Item -ItemType Directory -Path "$InstallDir\assets" -Force | Out-Null
 }
 
-$files = @("index.js", "client_widget.js", "token_stats.py", "package.json", "config.json", "run_daemon.vbs", "uninstall.ps1")
+$files = @("index.js", "client_widget.js", "token_stats.py", "package.json", "config.json", "launcher.cs", "uninstall.ps1")
 foreach ($f in $files) {
     $localSource = Join-Path $PSScriptRoot $f
     if ($PSScriptRoot -and (Test-Path $localSource)) {
@@ -118,6 +118,14 @@ foreach ($af in $assetFiles) {
     }
 }
 
+# Compilar lanzador nativo con icono oficial para Administrador de Tareas
+$csc = "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
+$exePath = "$InstallDir\Antigravity Tokens HUD.exe"
+$csSource = "$InstallDir\launcher.cs"
+if ((Test-Path $csc) -and (Test-Path $csSource)) {
+    & $csc /nologo /target:winexe /win32icon:"$InstallDir\assets\icon.ico" /out:"$exePath" "$csSource" | Out-Null
+}
+
 # Configuración de idioma por defecto (español)
 if (-not (Test-Path "$InstallDir\config.json")) {
     Set-Content -Path "$InstallDir\config.json" -Value '{"lang":"es"}' -Encoding UTF8
@@ -129,21 +137,24 @@ $startupFolder = [Environment]::GetFolderPath("Startup")
 $oldVbs = Join-Path $startupFolder "antigravity-tokens-hud.vbs"
 if (Test-Path $oldVbs) { Remove-Item -Path $oldVbs -Force -ErrorAction SilentlyContinue }
 
-$vbsPath = "$InstallDir\run_daemon.vbs"
 $iconPath = "$InstallDir\assets\icon.ico"
 $lnkPath = Join-Path $startupFolder "Antigravity Tokens HUD.lnk"
 
 $wshShell = New-Object -ComObject WScript.Shell
 $shortcut = $wshShell.CreateShortcut($lnkPath)
-$shortcut.TargetPath = "C:\Windows\System32\wscript.exe"
-$shortcut.Arguments = "`"$vbsPath`""
+if (Test-Path $exePath) {
+    $shortcut.TargetPath = $exePath
+    $shortcut.IconLocation = "$exePath,0"
+    Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "Antigravity Tokens HUD" -Value "`"$exePath`"" -Force
+} else {
+    $shortcut.TargetPath = "node.exe"
+    $shortcut.Arguments = "`"$InstallDir\index.js`""
+    $shortcut.IconLocation = "$iconPath,0"
+    Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "Antigravity Tokens HUD" -Value "`"node.exe`" `"$InstallDir\index.js`"" -Force
+}
 $shortcut.WorkingDirectory = $InstallDir
-$shortcut.IconLocation = "$iconPath,0"
 $shortcut.Description = "Antigravity Tokens HUD"
 $shortcut.Save()
-
-# Registro de Windows Run para visualización en Administrador de Tareas
-Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" -Name "Antigravity Tokens HUD" -Value "wscript.exe `"$vbsPath`"" -Force
 
 # 6. Registrar Plugin Oficial en Antigravity (Customizations)
 Write-Host "🔌 Registrando plugin oficial en Antigravity Customizations..." -ForegroundColor Yellow
@@ -163,7 +174,11 @@ Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object {
     $_.Name -like "*node*" -and $_.CommandLine -like "*antigravity-tokens-hud*" 
 } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
 
-Start-Process -FilePath "wscript.exe" -ArgumentList "`"$vbsPath`""
+if (Test-Path $exePath) {
+    Start-Process -FilePath $exePath
+} else {
+    Start-Process -FilePath "node.exe" -ArgumentList "`"$InstallDir\index.js`"" -WindowStyle Hidden
+}
 
 Write-Host ""
 Write-Host "==========================================================" -ForegroundColor Green

@@ -22,3 +22,4 @@ desktop.ini
 # IDE configs
 .vscode/
 .idea/
+*.exe
